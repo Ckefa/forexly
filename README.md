@@ -1,0 +1,2 @@
+# forexly
+trading app
