@@ -3,7 +3,7 @@ from api.users import users
 from api.database import User, Register
 
 
-@users.route("/register", methods=["GET", "POST"], strict_slashes=False)
+@users.route("/register", methods=["POST"], strict_slashes=False)
 def register():
     if request.method == "POST":
         new_user = Register(request.json)
@@ -11,28 +11,36 @@ def register():
         user_status = new_user.register()
         print(user_status)
 
-    return {"msg": user_status}
+        return {"msg": user_status}
+    else:
+        return {"msg": "invalid request method"}
 
 
-@users.route("/login", methods=["GET", "POST"], strict_slashes=False)
-def login():
-    if request.method == 'GET':
-        user = User.query.filter_by(phone = session.get('phone')).first()
-        if user:
-            return {"msg": f"{user.user}: success"}
+@users.route("/login/<phone>", methods=["GET", "POST"], strict_slashes=False)
+def login(phone=None):
+    if request.method == "GET":
+        if phone:
+            session["phone"] = phone
+        user = User.query.filter_by(phone=session.get("phone")).first()
+        if user and session.get("phone"):
+            payload = {"user": user.user, "phone": user.phone, "bal": user.bal}
+            return {"msg": f"{user.user}: success", "user": payload}
         else:
-            return {'msg': "user not logged in"}
+            return {"msg": "user not logged in"}
 
-    if request.method == 'POST':
+    if request.method == "POST":
         data = request.json
         user = User.query.filter_by(phone=data.get("phone")).first()
-        if user and user.passwd == data.get('passwd'):
-            session['phone'] =  user.phone
+        if user and user.passwd == data.get("passwd"):
+            session["phone"] = user.phone
             return {"msg": "success"}
-        return {"msg": 'failed'}
+        return {"msg": "failed"}
     return {"msg": "Something went wrong!"}
+
 
 @users.route("/logout", strict_slashes=False)
 def Logout():
-    session['phone'] =None
-    return "logout success"
+    if session.get("phone"):
+        session.pop("phone")
+        return {"msg": "logout success"}
+    return {"msg": "your are not logged in!"}

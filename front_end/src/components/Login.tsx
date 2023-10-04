@@ -29,11 +29,11 @@ function Login({ host }: parVal) {
       <Form className="w-[20vw] mx-auto" layout="vertical" onFinish={onFinish}>
         <span></span>
         <Form.Item label="Phone" name="phone">
-          <Input />
+          <Input required />
         </Form.Item>
 
         <Form.Item label="Password" name="passwd">
-          <Input />
+          <Input required />
         </Form.Item>
         <Button type="submit">Login</Button>
         <div className="flex gap-4 items-center">

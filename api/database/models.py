@@ -12,4 +12,3 @@ class User(db.Model):
     def __init__(self):
         self.id = str(uuid4())
         self.bal = 00.00
-

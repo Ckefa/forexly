@@ -11,8 +11,12 @@ type Package = {
 
 type parVal = {
   host: string;
+  update: {
+    setUser: React.Dispatch<React.SetStateAction<null>>;
+    setBal: React.Dispatch<React.SetStateAction<null>>;
+  };
 };
-function Myaccount({ host }: parVal) {
+function Myaccount({ host, update }: parVal) {
   const packages: Package[] = [
     { name: "lite", price: "500ksh", description: "package a", img: lite },
     { name: "silver", price: "800ksh", description: "package b", img: silver },
@@ -27,9 +31,13 @@ function Myaccount({ host }: parVal) {
   ];
 
   useEffect(() => {
-    fetch(`${host}login`)
+    fetch(`${host}login/0710`)
       .then((resp) => resp.json())
-      .then((resp) => console.log(resp));
+      .then((resp) => {
+        //console.log(resp);
+        update.setUser(resp.user.user);
+        update.setBal(resp.user.bal);
+      });
   }, []);
 
   return (
