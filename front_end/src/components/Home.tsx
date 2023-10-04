@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { hero1, trend } from "@/assets";
@@ -14,9 +16,11 @@ function Home() {
             Join our Forex trading community and unlock a world of opportunities
             in the financial markets.
           </p>
-          <Button className="bg-primary text-white rounded-full py-2 px-6 text-lg font-semibold hover:bg-foreground transition duration-300">
-            Get Started
-          </Button>
+          <Link className="mx-auto" to="/register">
+            <Button className="bg-primary text-white rounded-full py-2 px-6 text-lg font-semibold hover:bg-foreground transition duration-300">
+              Get Started
+            </Button>
+          </Link>
         </div>
         <img src={hero1} className="rounded" />
       </Card>

@@ -1,5 +1,5 @@
 import { Menu, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import {
   Button,
   DropdownMenu,
@@ -8,14 +8,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui";
+import { useState } from "react";
 
-const navItems = [
-  { name: "home", to: "/" },
-  { name: "dashboard", to: "/dashboard" },
-  { name: "myaccount", to: "/myaccount" },
-];
+type parVal = {
+  user: {
+    user: string | null;
+    bal: string | null;
+  };
+  host: string;
+};
+function Header({ user, host }: parVal) {
+  const [logout, setLogout] = useState(false);
+  const navItems = [
+    { name: "home", to: "/" },
+    { name: "dashboard", to: "/dashboard" },
+    { name: "myaccount", to: "/myaccount" },
+  ];
 
-function Header() {
+  const onLogout = () => {
+    fetch(`${host}logout`)
+      .then((resp) => resp.json)
+      .then((resp) => console.log(resp));
+    setLogout(true);
+  };
+
+  if (logout) return <Navigate to="/login" />;
+
   return (
     <div className="py-4 text-[20px] flex justify-between items-center">
       <div className="font-bold text-2xl">ForexLy</div>
@@ -26,7 +44,7 @@ function Header() {
             {item.name}
           </Link>
         ))}
-        <Link to="/signup">
+        <Link to="/register">
           <Button>join now</Button>
         </Link>
       </nav>
@@ -39,15 +57,15 @@ function Header() {
 
           <DropdownMenuContent className="flex flex-col bg-primary-foreground p-4 gap-1 rounded">
             <DropdownMenuItem>
-              <div>user: name</div>
+              <div>user: {user.user}</div>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <div>bal: 1234.33</div>
+              <div>bal: {user.bal}</div>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <div>Logout</div>
+              <Button onClick={onLogout}>Logout</Button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Card } from "./ui";
 import { lite, silver, gold, diamond, bronze } from "@/assets";
 
@@ -8,7 +9,14 @@ type Package = {
   img: string;
 };
 
-function Myaccount() {
+type parVal = {
+  host: string;
+  update: {
+    setUser: React.Dispatch<React.SetStateAction<null>>;
+    setBal: React.Dispatch<React.SetStateAction<null>>;
+  };
+};
+function Myaccount({ host, update }: parVal) {
   const packages: Package[] = [
     { name: "lite", price: "500ksh", description: "package a", img: lite },
     { name: "silver", price: "800ksh", description: "package b", img: silver },
@@ -21,6 +29,16 @@ function Myaccount() {
       img: diamond,
     },
   ];
+
+  useEffect(() => {
+    fetch(`${host}login/0710`)
+      .then((resp) => resp.json())
+      .then((resp) => {
+        //console.log(resp);
+        update.setUser(resp.user.user);
+        update.setBal(resp.user.bal);
+      });
+  }, []);
 
   return (
     <div className="flex flex-col">
