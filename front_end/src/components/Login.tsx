@@ -1,11 +1,28 @@
 import { Form } from "antd";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Input, Button } from "@/components/ui";
+import { useState } from "react";
 
-function Login() {
+type parVal = {
+  host: string;
+};
+function Login({ host }: parVal) {
+  const [home, setHome] = useState(false);
+
   const onFinish = (data: unknown) => {
-    console.log(data);
+    fetch(`${host}login `, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    })
+      .then((resp) => resp.json())
+      .then((resp) => {
+        console.log(resp);
+        if (resp.msg.includes("success")) setHome(true);
+      });
   };
+
+  if (home) return <Navigate to="/myaccount" />;
 
   return (
     <div className="">
@@ -20,7 +37,7 @@ function Login() {
         </Form.Item>
         <Button type="submit">Login</Button>
         <div className="flex gap-4 items-center">
-          <span>I have an account,</span>
+          <span>New member,</span>
           <Link to="/register">
             <Button variant="outline" className="border-primary">
               Register

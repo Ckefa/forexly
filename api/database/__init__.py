@@ -5,3 +5,4 @@ db = SQLAlchemy()
 
 
 from api.database.models import User
+from api.database.register import Register

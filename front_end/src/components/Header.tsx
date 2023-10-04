@@ -26,7 +26,7 @@ function Header() {
             {item.name}
           </Link>
         ))}
-        <Link to="/signup">
+        <Link to="/register">
           <Button>join now</Button>
         </Link>
       </nav>
