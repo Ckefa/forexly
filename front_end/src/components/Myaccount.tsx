@@ -39,6 +39,10 @@ function Myaccount({ host, update }: parVal) {
       });
   }, []);
 
+  const subscribe = (name: String) => {
+    console.log(name);
+  };
+
   return (
     <div className="flex flex-col">
       <div className="mx-auto font-bold">MyAccount</div>
@@ -58,6 +62,7 @@ function Myaccount({ host, update }: parVal) {
           <div className="grid grid-cols-3 gap-4 px-4">
             {packages.map((item) => (
               <Card
+                onClick={() => subscribe(item.name)}
                 className={`w-[20rem] bg-${item.name} flex flex-col items-center`}
                 key={item.name}
               >
