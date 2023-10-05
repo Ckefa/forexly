@@ -1,6 +1,6 @@
 from flask import request, session
 from api.users import users
-from api.database import User, Register
+from api.database import User, Register, Package, Subscription
 
 
 @users.route("/register", methods=["POST"], strict_slashes=False)
@@ -21,10 +21,17 @@ def login():
     if request.method == "GET":
         user = User.query.filter_by(phone=session.get("phone")).first()
         if user and session.get("phone"):
-            payload = {"user": user.user, "phone": user.phone, "bal": user.bal}
+            subs = Subscription.query.filter_by(user_id=user.id).all()
+            packs = []
+            for sub in subs:
+                pack_name = Package.query.filter_by(id = sub.package_id).first().name
+                packs.append(pack_name)
+
+            payload = {"user": user.user, "phone": user.phone, "bal": user.bal, 'packs':packs}
             return {"msg": f"{user.user}: success", "user": payload}
         else:
             return {"msg": "user not logged in"}
+       
 
     if request.method == "POST":
         data = request.json

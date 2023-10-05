@@ -34,13 +34,18 @@ function Myaccount({ host, update }: parVal) {
     fetch(`${host}login`)
       .then((resp) => resp.json())
       .then((resp) => {
-        update.setUser(resp.user.user);
-        update.setBal(resp.user.bal);
+        console.log(resp);
+        if (resp.user) {
+          update.setUser(resp.user.user);
+          update.setBal(resp.user.bal);
+        }
       });
   }, []);
 
-  const subscribe = (name: String) => {
-    console.log(name);
+  const subscribe = (name: string) => {
+    fetch(`${host}subscribe/${name}`)
+      .then((resp) => resp.json())
+      .then((resp) => console.log(resp));
   };
 
   return (
