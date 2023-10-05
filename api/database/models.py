@@ -21,11 +21,19 @@ class User(db.Model):
         self.bal = 00.00
         self.created_at = datetime.utcnow()
 
+    def get_subs(self):
+        packs = []
+        for pack in self.subs:
+            packs.append(pack.package.name)
+        return packs
+
 
 class Package(db.Model):
     id = db.Column(db.String(36), primary_key=True)
     name = db.Column(db.String(30), unique=True, nullable=False)
     price = db.Column(db.Integer)
+    income = db.Column(db.Float)
+    days = db.Column(db.Integer, default=30)
     description = db.Column(db.String(100))
     subs = db.relationship("Subscription", back_populates="package")
 
@@ -41,6 +49,8 @@ class Subscription(db.Model):
     created_at = db.Column(db.DateTime)
     user = db.relationship("User", back_populates="subs")
     package = db.relationship("Package", back_populates="subs")
+    revenue = db.Column(db.Float)
+    last_income = db.Column(db.DateTime)
 
     user_id = db.Column(db.String(36), db.ForeignKey("user.id"))
     package_id = db.Column(db.String(36), db.ForeignKey("package.id"))
@@ -48,3 +58,13 @@ class Subscription(db.Model):
     def __init__(self):
         self.id = str(uuid4())
         self.created_at = datetime.utcnow()
+
+    def receive(self):
+        if self.last_income.date() == datetime.utcnow().date():
+            return "income already recieved"
+
+        self.revenue += self.package.income
+        self.user.bal += self.package.income
+        self.package.days -= 1
+        self.last_income = datetime.utcnow()
+        return "success"
