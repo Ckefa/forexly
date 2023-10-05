@@ -31,10 +31,9 @@ function Myaccount({ host, update }: parVal) {
   ];
 
   useEffect(() => {
-    fetch(`${host}login/0710`)
+    fetch(`${host}login`)
       .then((resp) => resp.json())
       .then((resp) => {
-        //console.log(resp);
         update.setUser(resp.user.user);
         update.setBal(resp.user.bal);
       });

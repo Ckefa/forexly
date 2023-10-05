@@ -16,11 +16,9 @@ def register():
         return {"msg": "invalid request method"}
 
 
-@users.route("/login/<phone>", methods=["GET", "POST"], strict_slashes=False)
-def login(phone=None):
+@users.route("/login", methods=["GET", "POST"], strict_slashes=False)
+def login():
     if request.method == "GET":
-        if phone:
-            session["phone"] = phone
         user = User.query.filter_by(phone=session.get("phone")).first()
         if user and session.get("phone"):
             payload = {"user": user.user, "phone": user.phone, "bal": user.bal}
@@ -39,7 +37,7 @@ def login(phone=None):
 
 
 @users.route("/logout", strict_slashes=False)
-def Logout():
+def logout():
     if session.get("phone"):
         session.pop("phone")
         return {"msg": "logout success"}

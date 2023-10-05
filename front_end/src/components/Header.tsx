@@ -27,7 +27,7 @@ function Header({ user, host }: parVal) {
 
   const onLogout = () => {
     fetch(`${host}logout`)
-      .then((resp) => resp.json)
+      .then((resp) => resp.json())
       .then((resp) => console.log(resp));
     setLogout(true);
   };
