@@ -2,12 +2,12 @@ from api.users import users
 from api.database import db, User, Package, Subscription
 from flask import session
 
-@users.route("/subscribe/<package>", strict_slashes=True)
-def subscribe(package):
-    user = User.query.filter_by(phone=session.get('phone')).first()
+
+def add_subscribe(phone, package):
+    user = User.query.filter_by(phone=phone).first()
     pack = Package.query.filter_by(name=package).first()
-    
-    if user and session.get('phone'):
+
+    if user:
         if user.bal >= pack.price:
             new_sub = Subscription()
             new_sub.user = user
@@ -16,16 +16,24 @@ def subscribe(package):
 
             db.session.add(new_sub)
             db.session.commit()
-            return {"msg": "purchase completed successful"}
-        
-        else:
-            return {"msg": f"insufficient balance {user.bal}"}
+        return {"msg": "purchase completed successful"}
+
     else:
-        return {"msg": 'user not logged in!'}
-   
-@users.route('/recharge', strict_slashes=False)
+        return {"msg": f"insufficient balance {user.bal}"}
+
+
+@users.route("/subscribe/<package>", strict_slashes=True)
+def subscribe(package):
+    if session.get("phone"):
+        return add_subscribe(session.get("phone"), package)
+
+    else:
+        return {"msg": "user not logged in!"}
+
+
+@users.route("/recharge", strict_slashes=False)
 def recharge():
-    user = User.query.filter_by(phone=session.get('phone')).first()
+    user = User.query.filter_by(phone=session.get("phone")).first()
     user.bal += 500
     db.session.commit()
     return {"msg": "recharge successful"}

@@ -19,19 +19,19 @@ def register():
 @users.route("/login", methods=["GET", "POST"], strict_slashes=False)
 def login():
     if request.method == "GET":
+        session["phone"] = "0710"
         user = User.query.filter_by(phone=session.get("phone")).first()
         if user and session.get("phone"):
-            subs = Subscription.query.filter_by(user_id=user.id).all()
-            packs = []
-            for sub in subs:
-                pack_name = Package.query.filter_by(id = sub.package_id).first().name
-                packs.append(pack_name)
-
-            payload = {"user": user.user, "phone": user.phone, "bal": user.bal, 'packs':packs}
+            packs = user.get_subs()
+            payload = {
+                "user": user.user,
+                "phone": user.phone,
+                "bal": user.bal,
+                "packs": packs,
+            }
             return {"msg": f"{user.user}: success", "user": payload}
         else:
             return {"msg": "user not logged in"}
-       
 
     if request.method == "POST":
         data = request.json

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "./ui";
 import { lite, silver, gold, diamond, bronze } from "@/assets";
 
@@ -17,6 +17,7 @@ type parVal = {
   };
 };
 function Myaccount({ host, update }: parVal) {
+  const [packs, setPack] = useState(null);
   const packages: Package[] = [
     { name: "lite", price: "500ksh", description: "package a", img: lite },
     { name: "silver", price: "800ksh", description: "package b", img: silver },
@@ -38,10 +39,10 @@ function Myaccount({ host, update }: parVal) {
         if (resp.user) {
           update.setUser(resp.user.user);
           update.setBal(resp.user.bal);
+          if (resp.user.packs) setPack(resp.user.packs);
         }
       });
   }, []);
-
   const subscribe = (name: string) => {
     fetch(`${host}subscribe/${name}`)
       .then((resp) => resp.json())
@@ -55,11 +56,19 @@ function Myaccount({ host, update }: parVal) {
       <div className="flex flex-col gap-8">
         <div>
           <div className="font-semibold">Active Subscription</div>
-          <div>
-            You dont have any active package
-            <br />
-            Please Choose any package of your choice below!
-          </div>
+          {packs ? (
+            <div>
+              {packs.map((pack: string) => (
+                <div>{pack}</div>
+              ))}
+            </div>
+          ) : (
+            <div>
+              You dont have any active package
+              <br />
+              Please Choose any package of your choice below!
+            </div>
+          )}
         </div>
 
         <div>
