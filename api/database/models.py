@@ -22,10 +22,18 @@ class User(db.Model):
         self.created_at = datetime.utcnow()
 
     def get_subs(self):
-        packs = []
-        for pack in self.subs:
-            packs.append(pack.package.name)
-        return packs
+        packs = map(
+            lambda x: {
+                "id": x.id,
+                "name": x.package.name,
+                "price": x.package.price,
+                "revenue": x.revenue,
+                "days": x.package.days,
+                "created_at": x.created_at,
+            },
+            self.subs,
+        )
+        return list(packs)
 
 
 class Package(db.Model):

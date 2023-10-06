@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Card } from "./ui";
 import { lite, silver, gold, diamond, bronze } from "@/assets";
+import { Card } from "@/components/ui";
+import { Navigate } from "react-router-dom";
 
 type Package = {
   name: string;
@@ -16,8 +17,11 @@ type parVal = {
     setBal: React.Dispatch<React.SetStateAction<null>>;
   };
 };
+
 function Myaccount({ host, update }: parVal) {
-  const [packs, setPack] = useState(null);
+  const [packs, setPack] = useState<object[] | null>(null);
+  const [dash, setDash] = useState<boolean>(false);
+
   const packages: Package[] = [
     { name: "lite", price: "500ksh", description: "package a", img: lite },
     { name: "silver", price: "800ksh", description: "package b", img: silver },
@@ -43,12 +47,14 @@ function Myaccount({ host, update }: parVal) {
         }
       });
   }, []);
+
   const subscribe = (name: string) => {
     fetch(`${host}subscribe/${name}`)
       .then((resp) => resp.json())
       .then((resp) => console.log(resp));
   };
 
+  if (dash) return <Navigate to="/dashboard" />;
   return (
     <div className="flex flex-col">
       <div className="mx-auto font-bold">MyAccount</div>
@@ -57,9 +63,16 @@ function Myaccount({ host, update }: parVal) {
         <div>
           <div className="font-semibold">Active Subscription</div>
           {packs ? (
-            <div>
-              {packs.map((pack: string) => (
-                <div>{pack}</div>
+            <div className="flex gap-4">
+              {packs?.map((pack) => (
+                <Card
+                  onClick={() => setDash(true)}
+                  className={`bg-${pack.name} w-[200px] flex flex-col items-center`}
+                >
+                  <div>{pack.name}</div>
+                  <div>{pack.price} ksh</div>
+                  <div>Days Left: {pack.days}</div>
+                </Card>
               ))}
             </div>
           ) : (
