@@ -21,11 +21,11 @@ def home():
 
 
 packages = [
-    {"name": "lite", "price": 500, "description": "package a"},
-    {"name": "silver", "price": 800, "description": "package b"},
-    {"name": "bronze", "price": 1000, "description": "package c"},
-    {"name": "gold", "price": 1500, "description": "package d"},
-    {"name": "diamond", "price": 2000, "description": "package e"},
+    {"name": "lite", "price": 500, "description": "package a", "income": 25},
+    {"name": "silver", "price": 800, "description": "package b", "income": 35},
+    {"name": "bronze", "price": 1000, "description": "package c", "income": 45},
+    {"name": "gold", "price": 1500, "description": "package d", "income": 55},
+    {"name": "diamond", "price": 2000, "description": "package e", "income": 70},
 ]
 
 

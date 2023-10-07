@@ -37,3 +37,10 @@ def recharge():
     user.bal += 500
     db.session.commit()
     return {"msg": "recharge successful"}
+
+
+@users.route("/receive/<subs_id>", strict_slashes=False)
+def receive(subs_id):
+    subscription = Subscription.query.filter_by(id=subs_id).first()
+    res = subscription.receive()
+    return {"msg": res}

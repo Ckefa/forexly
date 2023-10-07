@@ -27,7 +27,9 @@ class User(db.Model):
                 "id": x.id,
                 "name": x.package.name,
                 "price": x.package.price,
+                "income": x.package.income,
                 "revenue": x.revenue,
+                "status": x.has_received(),
                 "days": x.package.days,
                 "created_at": x.created_at,
             },
@@ -45,8 +47,9 @@ class Package(db.Model):
     description = db.Column(db.String(100))
     subs = db.relationship("Subscription", back_populates="package")
 
-    def __init__(self, name, price, description):
+    def __init__(self, name, price, income, description):
         self.id = str(uuid4())
+        self.income = income
         self.name = name
         self.price = price
         self.description = description
@@ -57,7 +60,7 @@ class Subscription(db.Model):
     created_at = db.Column(db.DateTime)
     user = db.relationship("User", back_populates="subs")
     package = db.relationship("Package", back_populates="subs")
-    revenue = db.Column(db.Float)
+    revenue = db.Column(db.Float, default=0)
     last_income = db.Column(db.DateTime)
 
     user_id = db.Column(db.String(36), db.ForeignKey("user.id"))
@@ -68,11 +71,18 @@ class Subscription(db.Model):
         self.created_at = datetime.utcnow()
 
     def receive(self):
-        if self.last_income.date() == datetime.utcnow().date():
+        if self.has_received():
             return "income already recieved"
 
         self.revenue += self.package.income
         self.user.bal += self.package.income
         self.package.days -= 1
         self.last_income = datetime.utcnow()
+        db.session.commit()
         return "success"
+
+    def has_received(self):
+        if last_income := self.last_income:
+            if last_income.date() == datetime.utcnow().date():
+                return True
+        return False

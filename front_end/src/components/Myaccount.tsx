@@ -10,6 +10,16 @@ type Package = {
   img: string;
 };
 
+type packVal = {
+  id: string;
+  name: string;
+  price: string;
+  status: boolean;
+  description: string;
+  days: number;
+  revenue: number;
+};
+
 type parVal = {
   host: string;
   update: {
@@ -19,7 +29,7 @@ type parVal = {
 };
 
 function Myaccount({ host, update }: parVal) {
-  const [packs, setPack] = useState<object[] | null>(null);
+  const [packs, setPack] = useState<packVal[] | null>(null);
   const [dash, setDash] = useState<boolean>(false);
 
   const packages: Package[] = [
@@ -64,6 +74,7 @@ function Myaccount({ host, update }: parVal) {
           <div className="font-semibold">Active Subscription</div>
           {packs ? (
             <div className="flex gap-4">
+              <div className="bg-gold bg-silver bg-diamond bg-bronze hidden" />
               {packs?.map((pack) => (
                 <Card
                   onClick={() => setDash(true)}

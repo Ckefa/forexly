@@ -44,9 +44,12 @@ function Header({ user, host }: parVal) {
             {item.name}
           </Link>
         ))}
-        <Link to="/register">
-          <Button>join now</Button>
-        </Link>
+
+        {!user.user && (
+          <Link to="/register">
+            <Button>join now</Button>
+          </Link>
+        )}
       </nav>
 
       <div className="flex gap-4">

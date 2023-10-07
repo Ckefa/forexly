@@ -1,10 +1,10 @@
-import { Home, Myaccount, Register, Login } from "@/components";
+import { Home, Myaccount, Dashboard, Register, Login } from "@/components";
 
 import Header from "@/components/Header";
 import { Routes, Route } from "react-router-dom";
 import { useState } from "react";
 
-const URL = "http://localhost/";
+const URL = "/";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -25,6 +25,12 @@ function App() {
           />
           <Route path="/register" element={<Register host={URL} />} />
           <Route path="/login" element={<Login host={URL} />} />
+          <Route
+            path="/dashboard"
+            element={
+              <Dashboard update={UPDATE} user={user} bal={bal} host={URL} />
+            }
+          />
         </Routes>
       </div>
       <div className="h-4 mt-12 bg-black"></div>
