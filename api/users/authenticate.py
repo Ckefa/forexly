@@ -1,6 +1,6 @@
 from flask import request, session
 from api.users import users
-from api.database import User, Register, Package, Subscription
+from api.database import User, Register
 
 
 @users.route("/register", methods=["POST"], strict_slashes=False)
@@ -19,8 +19,8 @@ def register():
 @users.route("/login", methods=["GET", "POST"], strict_slashes=False)
 def login():
     if request.method == "GET":
-        session["phone"] = "0710"
-        user = User.query.filter_by(phone=session.get("phone")).first()
+        phone = session.get("phone")
+        user = User.query.filter_by(phone=phone).first()
         if user and session.get("phone"):
             packs = user.get_subs()
             payload = {

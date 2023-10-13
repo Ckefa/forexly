@@ -2,6 +2,7 @@
 from flask import Flask, render_template
 from flask_cors import CORS
 from api.database import db, Package
+from api import base
 from api.users import users
 from uuid import uuid4
 
@@ -11,13 +12,9 @@ app = Flask(
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.secret_key = str(uuid4())
 db.init_app(app)
+app.register_blueprint(base)
 app.register_blueprint(users)
 CORS(app)
-
-
-@app.route("/", strict_slashes=False)
-def home():
-    return render_template("index.html")
 
 
 packages = [
