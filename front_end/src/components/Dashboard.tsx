@@ -29,6 +29,7 @@ function Dashboard({ host, user, bal, update }: parVal) {
   const [income, setIncome] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
   const [invest, setInvest] = useState<number>(0);
+  const [recharge, setRecharge] = useState([]);
 
   const withDm = useRef(null);
   const rechAm = useRef(null);
@@ -77,6 +78,48 @@ function Dashboard({ host, user, bal, update }: parVal) {
       });
   };
 
+  const onRecharge = () => {
+    if (rechAm) {
+      fetch(`${host}recharge`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      })
+        .then((resp) => {
+          return resp.json();
+        })
+        .then((resp) => {
+          if (resp.pending) setRecharge(resp.pending);
+          else if (resp.new) setRecharge(resp.new);
+          else console.log(resp);
+        });
+    }
+  };
+
+  if (recharge.length > 0) {
+    const newWindowHeigth = window.innerHeight;
+    const newWindowWidth = window.innerWidth * 0.8;
+    const newWindow = window.open(
+      "",
+      "payment Varification",
+      `width=${newWindowWidth}, height=${newWindowHeigth}`
+    );
+    newWindow?.document.write(`
+      <html>
+        <body>
+          <div>
+            <iframe
+              title="Checkout Iframe"
+              src="${recharge[0]}"
+              width="100%"
+              height="400"
+              allowFullScreen
+            ></iframe>
+          </div>
+        </body>
+      </html>
+    `);
+  }
+
   const activeButton = (
     e: React.ChangeEvent<HTMLInputElement>,
     cls: string
@@ -104,7 +147,6 @@ function Dashboard({ host, user, bal, update }: parVal) {
           <div>Total Earnings: {total}</div>
         </Card>
       </div>
-
       <div className="mt-8">
         <div className="font-bold">My Products</div>
         <div className="flex gap-4">
@@ -141,7 +183,11 @@ function Dashboard({ host, user, bal, update }: parVal) {
                   onChange={(e) => activeButton(e, "recharge")}
                   placeholder="200"
                 />
-                <Button variant="outline" className="recharge border-blue-300">
+                <Button
+                  onClick={onRecharge}
+                  variant="outline"
+                  className="recharge border-blue-300"
+                >
                   Recharge
                 </Button>
               </Card>
@@ -177,7 +223,6 @@ function Dashboard({ host, user, bal, update }: parVal) {
           </div>
         </Card>
       </div>
-
       <div className="mt-8">
         <div className="font-bold">Rewards</div>
         <div className="flex gap-4">

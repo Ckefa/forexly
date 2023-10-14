@@ -4,7 +4,9 @@ import Header from "@/components/Header";
 import { Routes, Route } from "react-router-dom";
 import { useState } from "react";
 
-const URL = "/";
+const URL = window.location.hostname.includes("localhost")
+  ? "http://localhost/"
+  : "/";
 
 function App() {
   const [user, setUser] = useState(null);
