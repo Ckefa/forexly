@@ -16,11 +16,21 @@ function Home() {
             Join our Forex trading community and unlock a world of opportunities
             in the financial markets.
           </p>
-          <Link className="mx-auto" to="/register">
-            <Button className="bg-primary text-white rounded-full py-2 px-6 text-lg font-semibold hover:bg-foreground transition duration-300">
-              Get Started
-            </Button>
-          </Link>
+          <div className="flex justify-center py-4 gap-4">
+            <Link to="/login">
+              <Button variant="outline" className="text-lg font-semibold">
+                Login
+              </Button>
+            </Link>
+            <Link className="" to="/register">
+              <Button
+                className="bg-primary text-white rounded-full
+               text-lg font-semibold "
+              >
+                Get Started
+              </Button>
+            </Link>
+          </div>
         </div>
         <img src={hero1} className="rounded" />
       </Card>

@@ -1,5 +1,5 @@
 import { Menu, User } from "lucide-react";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   Button,
   DropdownMenu,
@@ -19,12 +19,17 @@ type parVal = {
 };
 function Header({ user, host }: parVal) {
   const [logout, setLogout] = useState(false);
+  const [login, setLogin] = useState(false);
+
   const navItems = [
     { name: "home", to: "/" },
     { name: "dashboard", to: "/dashboard" },
     { name: "myaccount", to: "/myaccount" },
   ];
 
+  const onLogin = () => {
+    setLogin(true);
+  };
   const onLogout = () => {
     fetch(`${host}logout`)
       .then((resp) => resp.json())
@@ -32,7 +37,8 @@ function Header({ user, host }: parVal) {
     setLogout(true);
   };
 
-  if (logout) return <Navigate to="/login" />;
+  if (logout) window.location.href = "/";
+  else if (login) window.location.href = "/login";
 
   return (
     <div className="py-4 text-[20px] flex justify-between items-center">
@@ -68,7 +74,11 @@ function Header({ user, host }: parVal) {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <Button onClick={onLogout}>Logout</Button>
+              {user.user ? (
+                <Button onClick={onLogout}>Logout</Button>
+              ) : (
+                <Button onClick={onLogin}>Login</Button>
+              )}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

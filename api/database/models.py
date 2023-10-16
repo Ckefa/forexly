@@ -25,7 +25,17 @@ class User(db.Model):
 
     def get_invoices(self):
         orders = filter(lambda x: not x.is_paid, self.orders)
-        orders = map(lambda x: x.redirect_url, orders)
+        orders = map(
+            lambda x: {
+                "id": x.id,
+                "amount": x.amount,
+                "status": x.is_paid,
+                "created_at": x.created_at,
+                "order_track_id": x.order_track_id,
+                "checkout": x.redirect_url,
+            },
+            orders,
+        )
         return list(orders)
 
     def get_subs(self):
@@ -98,6 +108,7 @@ class Subscription(db.Model):
 
 class Orders(db.Model):
     id = db.Column(db.String(36), primary_key=True)
+    amount = db.Column(db.Float)
     user = db.relationship("User", back_populates="orders")
     user_id = db.Column(db.String(36), db.ForeignKey("user.id"))
     order_track_id = db.Column(db.String)
@@ -107,14 +118,18 @@ class Orders(db.Model):
     created_at = db.Column(db.DateTime)
     is_paid = db.Column(db.Boolean, default=False)
 
-    def __init__(self, phone):
+    def __init__(self, amount, phone):
         self.id = str(uuid4())
         self.created_at = datetime.utcnow()
         user = User.query.filter_by(phone=phone).first()
         self.user = user
+        self.amount = amount
         try:
             ppal = Pesapal(self.id)
-            ppal = ppal.request_payment(200, user.phone, "clinton", "kefa")
+            ppal = ppal.request_payment(int(amount), user.phone, "clinton", "kefa")
+            if not ppal or not ppal.get("order_tracking_id"):
+                print(ppal)
+                raise f"Error placing order {amount}"
             self.order_track_id = ppal.get("order_tracking_id")
             self.redirect_url = ppal.get("redirect_url")
             self.errror = ppal.get("error")
@@ -130,35 +145,15 @@ class Orders(db.Model):
             ppal = ppal.payment_status(self.order_track_id)
             amount = ppal.get("amount")
             details = ppal.get("payment_status_description")
-            if ppal and details == "Failded":
-                db.session.delete(self)
-                db.session.commit()
-            elif ppal and details != "Failed":
-                self.is_paid = True
-                self.user.bal += float(amount)
-
+            if ppal:
+                if details in {"Failed", "INVALID"}:
+                    return {"msg": "transaction failde!", "resp": ppal}
+                elif details not in {"Failed", "INVALID"}:
+                    self.is_paid = True
+                    self.user.bal += float(amount)
+                    return {"msg": "Recharge Successful!", "resp": ppal}
             return ppal
 
         except Exception as e:
             print(e)
             return {"msg": "Errer in fetcing payment details"}
-
-
-# status = {
-#     "amount": 100.0,
-#     "call_back_url": "https://betbot.run-us-west2.goorm.app/pay?OrderTrackingId=616edd3b-2411-478d-9964-de113dc8f030&OrderMerchantReference=ed11e979-73ff-4610-b7b2-e2ee4dc9104c",
-#     "confirmation_code": "23576153",
-#     "created_date": "2023-10-14T12:07:36.85",
-#     "currency": "KES",
-#     "description": null,
-#     "error": {"code": null, "error_type": null, "message": null},
-#     "merchant_reference": "ed11e979-73ff-4610-b7b2-e2ee4dc9104c",
-#     "message": "Request processed successfully",
-#     "order_tracking_id": "616edd3b-2411-478d-9964-de113dc8f030",
-#     "payment_account": "2547xxx33687",
-#     "payment_method": "MpesaKE",
-#     "payment_status_code": "request_terminated_by_user",
-#     "payment_status_description": "Failed",
-#     "status": "200",
-#     "status_code": 2,
-# }

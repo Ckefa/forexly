@@ -22,6 +22,13 @@ type packVal = {
   revenue: number;
 };
 
+type rechPar = {
+  amount: number;
+  is_paid: boolean;
+  order_track_id: string;
+  checkout: string;
+};
+
 function Dashboard({ host, user, bal, update }: parVal) {
   const [packs, setPacks] = useState<packVal[] | null>(null);
   const [phone, setPhone] = useState<[] | null>(null);
@@ -29,7 +36,8 @@ function Dashboard({ host, user, bal, update }: parVal) {
   const [income, setIncome] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
   const [invest, setInvest] = useState<number>(0);
-  const [recharge, setRecharge] = useState([]);
+  const [recharge, setRecharge] = useState<rechPar[]>([]);
+  const [pay, setPay] = useState(false);
 
   const withDm = useRef(null);
   const rechAm = useRef(null);
@@ -40,7 +48,7 @@ function Dashboard({ host, user, bal, update }: parVal) {
   }, []);
 
   useEffect(() => {
-    console.log("Fetching user details....");
+    // console.log("Fetching user details....");
     fetch(`${host}login`)
       .then((resp) => resp.json())
       .then((resp) => {
@@ -51,6 +59,14 @@ function Dashboard({ host, user, bal, update }: parVal) {
           setPhone(resp.user.phone);
           updateUser(resp.user.packs);
         }
+      });
+
+    fetch(`${host}recharge`)
+      .then((resp) => resp.json())
+      .then((resp) => {
+        console.log(resp);
+        if (resp.pending) setRecharge(resp.pending);
+        else setRecharge([]);
       });
   }, [refresh]);
 
@@ -78,11 +94,20 @@ function Dashboard({ host, user, bal, update }: parVal) {
       });
   };
 
-  const onRecharge = () => {
-    if (rechAm) {
+  const onRecharge = (resubmit: boolean) => {
+    if (recharge.length > 0 && !resubmit) {
+      alert(
+        "Please cancel all pending and failed recharge bofore requesting for anothor"
+      );
+      return;
+    }
+    const amount = (rechAm.current as null | HTMLInputElement)?.value;
+
+    if (!resubmit && amount)
       fetch(`${host}recharge`, {
-        method: "GET",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: amount }),
       })
         .then((resp) => {
           return resp.json();
@@ -92,10 +117,11 @@ function Dashboard({ host, user, bal, update }: parVal) {
           else if (resp.new) setRecharge(resp.new);
           else console.log(resp);
         });
-    }
+    setPay(true);
   };
 
-  if (recharge.length > 0) {
+  if (recharge.length > 0 && pay) {
+    setPay(false);
     const newWindowHeigth = window.innerHeight;
     const newWindowWidth = window.innerWidth * 0.8;
     const newWindow = window.open(
@@ -103,22 +129,56 @@ function Dashboard({ host, user, bal, update }: parVal) {
       "payment Varification",
       `width=${newWindowWidth}, height=${newWindowHeigth}`
     );
+
     newWindow?.document.write(`
-      <html>
-        <body>
-          <div>
-            <iframe
-              title="Checkout Iframe"
-              src="${recharge[0]}"
-              width="100%"
-              height="400"
-              allowFullScreen
-            ></iframe>
-          </div>
-        </body>
-      </html>
-    `);
+                <html>
+                  <body>
+                    <div>
+                      <iframe
+                        title="Checkout Iframe"
+                        src="${recharge[0].checkout}"
+                        width="100%"
+                        height="400"
+                        allowFullScreen
+                      ></iframe>
+                    </div>
+                  </body>
+                </html>
+              `);
+
+    if (newWindow)
+      newWindow.onbeforeunload = () => {
+        fetch(`${host}recharge`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            order_track_id: recharge[0].order_track_id,
+          }),
+        })
+          .then((resp) => resp.json())
+          .then((resp) => {
+            console.log(resp);
+            if (resp.payment_status_code)
+              alert(
+                `recharge of ${resp.amount} ${resp.payment_status_description} ${resp.payment_status_code}`
+              );
+            else if (resp.payment_status_description)
+              alert(
+                `recharge of ${resp.amount}, description: ${resp.payment_status_description}`
+              );
+            else alert(resp.msg);
+          });
+      };
   }
+
+  const cancelRecharge = (order_track_id: string) => {
+    fetch(`${host}cancel/${order_track_id}`)
+      .then((resp) => resp.json())
+      .then((resp) => {
+        console.log(resp);
+        setRefresh(!refresh);
+      });
+  };
 
   const activeButton = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -184,7 +244,7 @@ function Dashboard({ host, user, bal, update }: parVal) {
                   placeholder="200"
                 />
                 <Button
-                  onClick={onRecharge}
+                  onClick={() => onRecharge(false)}
                   variant="outline"
                   className="recharge border-blue-300"
                 >
@@ -218,6 +278,28 @@ function Dashboard({ host, user, bal, update }: parVal) {
                 <div>Type</div>
                 <div>amount</div>
                 <div>status</div>
+                <div>action</div>
+              </div>
+              <div>
+                {recharge.map((item) => (
+                  <div
+                    key={item.order_track_id}
+                    className="flex px-4 gap-4 justify-between"
+                  >
+                    <div>Recharge</div>
+                    <div>{item.amount}</div>
+                    <div>{item.is_paid ? "successful" : "pending.."}</div>
+                    <div className="flex gap-1">
+                      <Button onClick={() => onRecharge(true)}>pay</Button>
+                      <Button
+                        onClick={() => cancelRecharge(item.order_track_id)}
+                        variant="destructive"
+                      >
+                        cancel
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </Card>
           </div>
