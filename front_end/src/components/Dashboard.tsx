@@ -24,7 +24,7 @@ type packVal = {
 
 type rechPar = {
   amount: number;
-  is_paid: boolean;
+  status: boolean;
   order_track_id: string;
   checkout: string;
 };
@@ -37,7 +37,6 @@ function Dashboard({ host, user, bal, update }: parVal) {
   const [total, setTotal] = useState<number>(0);
   const [invest, setInvest] = useState<number>(0);
   const [recharge, setRecharge] = useState<rechPar[]>([]);
-  const [pay, setPay] = useState(false);
 
   const withDm = useRef(null);
   const rechAm = useRef(null);
@@ -94,16 +93,20 @@ function Dashboard({ host, user, bal, update }: parVal) {
       });
   };
 
-  const onRecharge = (resubmit: boolean) => {
-    if (recharge.length > 0 && !resubmit) {
+  const onRecharge = () => {
+    let redLight = false;
+    if (recharge.some((item) => !item.status)) {
       alert(
         "Please cancel all pending and failed recharge bofore requesting for anothor"
       );
-      return;
+      redLight = true;
     }
+
+    if (redLight) return;
+
     const amount = (rechAm.current as null | HTMLInputElement)?.value;
 
-    if (!resubmit && amount)
+    if (amount) {
       fetch(`${host}recharge`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -113,15 +116,18 @@ function Dashboard({ host, user, bal, update }: parVal) {
           return resp.json();
         })
         .then((resp) => {
-          if (resp.pending) setRecharge(resp.pending);
-          else if (resp.new) setRecharge(resp.new);
-          else console.log(resp);
+          if (resp.pending) {
+            setRecharge(resp.pending);
+            checkOut(resp.pending.checkout);
+          } else if (resp.new) {
+            setRecharge(resp.new);
+            checkOut(resp.new.checkout);
+          } else console.log(resp);
         });
-    setPay(true);
+    } else alert("invalid recharge amount");
   };
 
-  if (recharge.length > 0 && pay) {
-    setPay(false);
+  const checkOut = (url: string) => {
     const newWindowHeigth = window.innerHeight;
     const newWindowWidth = window.innerWidth * 0.8;
     const newWindow = window.open(
@@ -136,7 +142,7 @@ function Dashboard({ host, user, bal, update }: parVal) {
                     <div>
                       <iframe
                         title="Checkout Iframe"
-                        src="${recharge[0].checkout}"
+                        src=${url}
                         width="100%"
                         height="400"
                         allowFullScreen
@@ -169,7 +175,7 @@ function Dashboard({ host, user, bal, update }: parVal) {
             else alert(resp.msg);
           });
       };
-  }
+  };
 
   const cancelRecharge = (order_track_id: string) => {
     fetch(`${host}cancel/${order_track_id}`)
@@ -244,7 +250,7 @@ function Dashboard({ host, user, bal, update }: parVal) {
                   placeholder="200"
                 />
                 <Button
-                  onClick={() => onRecharge(false)}
+                  onClick={() => onRecharge()}
                   variant="outline"
                   className="recharge border-blue-300"
                 >
@@ -288,14 +294,19 @@ function Dashboard({ host, user, bal, update }: parVal) {
                   >
                     <div>Recharge</div>
                     <div>{item.amount}</div>
-                    <div>{item.is_paid ? "successful" : "pending.."}</div>
+                    <div>{item.status ? "successful" : "pending.."}</div>
                     <div className="flex gap-1">
-                      <Button onClick={() => onRecharge(true)}>pay</Button>
+                      {!item.status && (
+                        <Button onClick={() => checkOut(item.checkout)}>
+                          pay
+                        </Button>
+                      )}
+
                       <Button
                         onClick={() => cancelRecharge(item.order_track_id)}
-                        variant="destructive"
+                        variant={item.status ? "outline" : "destructive"}
                       >
-                        cancel
+                        {item.status ? "done" : "cancel"}
                       </Button>
                     </div>
                   </div>

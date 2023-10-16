@@ -24,11 +24,11 @@ def recharge():
         phone = session.get("phone")
         user = User.query.filter_by(phone=phone).first()
         if user:
-            pending = user.get_invoices()
-            if pending:
-                return {"pending": pending}
+            orders = user.get_orders()
+            if orders:
+                return {"pending": orders}
             else:
-                return {"msg": "no pending invoices"}
+                return {"msg": "no orders yet"}
 
         return {"msg": "please login first"}
 

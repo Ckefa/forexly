@@ -25,6 +25,9 @@ class User(db.Model):
 
     def get_invoices(self):
         orders = filter(lambda x: not x.is_paid, self.orders)
+        for order in orders:
+            if not order.is_paid:
+                order.get_status()
         orders = map(
             lambda x: {
                 "id": x.id,
@@ -36,7 +39,25 @@ class User(db.Model):
             },
             orders,
         )
-        return list(orders)
+        return list(orders)[::-1]
+
+    def get_orders(self):
+        orders = self.orders
+        for order in orders:
+            if not order.is_paid:
+                order.get_status()
+        orders = map(
+            lambda x: {
+                "id": x.id,
+                "amount": x.amount,
+                "status": x.is_paid,
+                "created_at": x.created_at,
+                "order_track_id": x.order_track_id,
+                "checkout": x.redirect_url,
+            },
+            orders,
+        )
+        return list(orders)[::-1]
 
     def get_subs(self):
         packs = map(
@@ -148,7 +169,7 @@ class Orders(db.Model):
             if ppal:
                 if details in {"Failed", "INVALID"}:
                     return {"msg": "transaction failde!", "resp": ppal}
-                elif details not in {"Failed", "INVALID"}:
+                elif details not in {"Failed", "INVALID"} and not self.is_paid:
                     self.is_paid = True
                     self.user.bal += float(amount)
                     return {"msg": "Recharge Successful!", "resp": ppal}

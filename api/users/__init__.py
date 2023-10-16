@@ -9,4 +9,4 @@ from flask import Blueprint
 print("Initializing Users Module....")
 users = Blueprint("users", __name__)
 
-from api.users import authenticate, subscribe
+from api.users import authenticate, subscribe, recharge
