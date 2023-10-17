@@ -3,15 +3,17 @@
 import requests
 import json
 
+base_url = "https://pay.pesapal.com/v3"
+
 
 def get_access_token():
-    url = "https://cybqa.pesapal.com/pesapalv3/api/Auth/RequestToken"
+    url = f"{base_url}/api/Auth/RequestToken"
 
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     payload = json.dumps(
         {
-            "consumer_key": "qkio1BGGYAXTu2JOfm7XSXNruoZsrqEW",
-            "consumer_secret": "osGQ364R49cXKeOYSpaOnT++rHs=",
+            "consumer_key": "EaHh4MvLX/7oqtFwInaUE4AldUJKJHP+",
+            "consumer_secret": "Wsqi+NneC0x7IHcE7XgZMj3E3tI=",
         }
     )
 
@@ -27,7 +29,7 @@ class Pesapal:
         self.callback_url = "https://betbot.run-us-west2.goorm.app/pay"
 
     def register_ipn(self):
-        url = "https://cybqa.pesapal.com/pesapalv3/api/URLSetup/RegisterIPN"
+        url = f"{base_url}/api/URLSetup/RegisterIPN"
 
         payload = json.dumps(
             {
@@ -47,7 +49,7 @@ class Pesapal:
         return ipn_id
 
     def submit_order(self, ipn_id, amount, phone, fname, lname):
-        url = "https://cybqa.pesapal.com/pesapalv3/api/Transactions/SubmitOrderRequest"
+        url = f"{base_url}/api/Transactions/SubmitOrderRequest"
         payload = json.dumps(
             {
                 "id": self.order_id,
@@ -83,9 +85,7 @@ class Pesapal:
         return response
 
     def payment_status(self, order_track_id):
-        url = (
-            "https://cybqa.pesapal.com/pesapalv3/api/Transactions/GetTransactionStatus"
-        )
+        url = f"{base_url}/api/Transactions/GetTransactionStatus"
 
         payload = {}
         params = {"orderTrackingId": order_track_id}
