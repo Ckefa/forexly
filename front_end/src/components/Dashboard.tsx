@@ -123,6 +123,8 @@ function Dashboard({ host, user, bal, update }: parVal) {
             setRecharge(resp.new);
             checkOut(resp.new.checkout);
           } else console.log(resp);
+
+          setRefresh(!refresh);
         });
     } else alert("invalid recharge amount");
   };

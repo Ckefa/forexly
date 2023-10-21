@@ -31,6 +31,7 @@ type parVal = {
 function Myaccount({ host, update }: parVal) {
   const [packs, setPack] = useState<packVal[] | null>(null);
   const [dash, setDash] = useState<boolean>(false);
+  const [refresh, setRefresh] = useState<boolean>(false);
 
   const packages: Package[] = [
     { name: "lite", price: "500ksh", description: "package a", img: lite },
@@ -62,6 +63,8 @@ function Myaccount({ host, update }: parVal) {
     fetch(`${host}subscribe/${name}`)
       .then((resp) => resp.json())
       .then((resp) => console.log(resp));
+
+    setRefresh(!refresh);
   };
 
   if (dash) return <Navigate to="/dashboard" />;
