@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { lite, silver, gold, diamond, bronze } from "@/assets";
 import { Card } from "@/components/ui";
 import { Navigate } from "react-router-dom";
+import { Spin } from "antd";
 
 type Package = {
   name: string;
@@ -32,6 +33,7 @@ function Myaccount({ host, update }: parVal) {
   const [packs, setPack] = useState<packVal[] | null>(null);
   const [dash, setDash] = useState<boolean>(false);
   const [refresh, setRefresh] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const packages: Package[] = [
     { name: "lite", price: "500ksh", description: "package a", img: lite },
@@ -47,6 +49,7 @@ function Myaccount({ host, update }: parVal) {
   ];
 
   useEffect(() => {
+    setLoading(true);
     fetch(`${host}login`)
       .then((resp) => resp.json())
       .then((resp) => {
@@ -55,6 +58,7 @@ function Myaccount({ host, update }: parVal) {
           update.setUser(resp.user.user);
           update.setBal(resp.user.bal);
           if (resp.user.packs) setPack(resp.user.packs);
+          setLoading(false);
         }
       });
   }, []);
@@ -75,6 +79,9 @@ function Myaccount({ host, update }: parVal) {
       <div className="flex flex-col gap-8">
         <div>
           <div className="font-semibold">Active Subscription</div>
+
+          {loading && <Spin className="ml-28" />}
+
           {packs ? (
             <div className="flex gap-4">
               <div className="bg-gold bg-silver bg-diamond bg-bronze hidden" />

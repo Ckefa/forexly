@@ -17,7 +17,7 @@ def add_subscribe(phone, package):
             db.session.add(new_sub)
             db.session.commit()
         return {"msg": "purchase completed successful"}
-
+        
     else:
         return {"msg": f"insufficient balance {user.bal}"}
 

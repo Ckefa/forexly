@@ -1,4 +1,5 @@
 import { Card, Button, Input } from "@/components/ui";
+import { Spin } from "antd";
 import React, { useEffect, useState, useRef } from "react";
 
 type parVal = {
@@ -33,6 +34,8 @@ function Dashboard({ host, user, bal, update }: parVal) {
   const [packs, setPacks] = useState<packVal[] | null>(null);
   const [phone, setPhone] = useState<[] | null>(null);
   const [refresh, setRefresh] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [loadRech, setLoadRech] = useState<boolean>(false);
   const [income, setIncome] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
   const [invest, setInvest] = useState<number>(0);
@@ -46,8 +49,8 @@ function Dashboard({ host, user, bal, update }: parVal) {
     console.log(packs);
   }, []);
 
-  useEffect(() => {
-    // console.log("Fetching user details....");
+  const fetchLogin = () => {
+    setLoading(true);
     fetch(`${host}login`)
       .then((resp) => resp.json())
       .then((resp) => {
@@ -57,16 +60,26 @@ function Dashboard({ host, user, bal, update }: parVal) {
           setPacks(resp.user.packs);
           setPhone(resp.user.phone);
           updateUser(resp.user.packs);
+          setLoading(false);
         }
       });
-
+  };
+  const fetchRecharge = () => {
+    setLoadRech(true);
     fetch(`${host}recharge`)
       .then((resp) => resp.json())
       .then((resp) => {
         console.log(resp);
         if (resp.pending) setRecharge(resp.pending);
         else setRecharge([]);
+
+        setLoadRech(false);
       });
+  };
+
+  useEffect(() => {
+    fetchLogin();
+    fetchRecharge();
   }, [refresh]);
 
   const updateUser = (packs: packVal[]) => {
@@ -202,40 +215,57 @@ function Dashboard({ host, user, bal, update }: parVal) {
   return (
     <div>
       <div className="font-bold">My Dashboard</div>
+
       <div className="flex gap-4">
         <Card className="flex-1 p-4">
-          <div>User: {user}</div>
-          <div>phone: {phone}</div>
-          <div>Balance: {bal}</div>
+          {loading ? (
+            <Spin className="ml-28" />
+          ) : (
+            <React.Fragment>
+              <div>User: {user}</div>
+              <div>phone: {phone}</div>
+              <div>Balance: {bal}</div>
+            </React.Fragment>
+          )}
         </Card>
 
         <Card className="flex-1 p-4">
-          <div>Total Invenstments: {invest}</div>
-          <div>Todays Income: {income}</div>
-          <div>Total Earnings: {total}</div>
+          {loading ? (
+            <Spin className="ml-28" />
+          ) : (
+            <React.Fragment>
+              <div>Total Invenstments: {invest}</div>
+              <div>Todays Income: {income}</div>
+              <div>Total Earnings: {total}</div>
+            </React.Fragment>
+          )}
         </Card>
       </div>
       <div className="mt-8">
         <div className="font-bold">My Products</div>
-        <div className="flex gap-4">
-          <div className="bg-gold bg-silver bg-diamond bg-bronze hidden" />
-          {packs?.map((item) => (
-            <Card
-              className={`w-[200px] bg-${item.name} flex flex-col items-center`}
-            >
-              <div>pack: {item.name}</div>
-              <div>price: {item.price} ksh</div>
-              <div>revenue: {item.revenue} ksh</div>
-              <Button
-                className="w-full"
-                variant={item.status ? "secondary" : undefined}
-                onClick={() => receive(item.id)}
+        {loading ? (
+          <Spin className="ml-28" />
+        ) : (
+          <div className="flex gap-4">
+            <div className="bg-gold bg-silver bg-diamond bg-bronze hidden" />
+            {packs?.map((item) => (
+              <Card
+                className={`w-[200px] bg-${item.name} flex flex-col items-center`}
               >
-                {item.status ? "Received" : "Receive"}
-              </Button>
-            </Card>
-          ))}
-        </div>
+                <div>pack: {item.name}</div>
+                <div>price: {item.price} ksh</div>
+                <div>revenue: {item.revenue} ksh</div>
+                <Button
+                  className="w-full"
+                  variant={item.status ? "secondary" : undefined}
+                  onClick={() => receive(item.id)}
+                >
+                  {item.status ? "Received" : "Receive"}
+                </Button>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="mt-8">
@@ -288,32 +318,36 @@ function Dashboard({ host, user, bal, update }: parVal) {
                 <div>status</div>
                 <div>action</div>
               </div>
-              <div>
-                {recharge.map((item) => (
-                  <div
-                    key={item.order_track_id}
-                    className="flex px-4 gap-4 justify-between"
-                  >
-                    <div>Recharge</div>
-                    <div>{item.amount}</div>
-                    <div>{item.status ? "successful" : "pending.."}</div>
-                    <div className="flex gap-1">
-                      {!item.status && (
-                        <Button onClick={() => checkOut(item.checkout)}>
-                          pay
-                        </Button>
-                      )}
+              {loadRech ? (
+                <Spin />
+              ) : (
+                <div>
+                  {recharge.map((item) => (
+                    <div
+                      key={item.order_track_id}
+                      className="flex px-4 gap-4 justify-between"
+                    >
+                      <div>Recharge</div>
+                      <div>{item.amount}</div>
+                      <div>{item.status ? "successful" : "pending.."}</div>
+                      <div className="flex gap-1">
+                        {!item.status && (
+                          <Button onClick={() => checkOut(item.checkout)}>
+                            pay
+                          </Button>
+                        )}
 
-                      <Button
-                        onClick={() => cancelRecharge(item.order_track_id)}
-                        variant={item.status ? "outline" : "destructive"}
-                      >
-                        {item.status ? "done" : "cancel"}
-                      </Button>
+                        <Button
+                          onClick={() => cancelRecharge(item.order_track_id)}
+                          variant={item.status ? "outline" : "destructive"}
+                        >
+                          {item.status ? "done" : "cancel"}
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </Card>
           </div>
         </Card>
