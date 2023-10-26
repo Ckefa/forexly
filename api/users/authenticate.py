@@ -20,8 +20,9 @@ def register():
 def login():
     if request.method == "GET":
         phone = session.get("phone")
+        # phone = "0710"
         user = User.query.filter_by(phone=phone).first()
-        if user and session.get("phone"):
+        if user:
             packs = user.get_subs()
             payload = {
                 "user": user.user,
