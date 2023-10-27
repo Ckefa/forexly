@@ -1,6 +1,9 @@
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { Card, Button, Input } from "@/components/ui";
-import { Spin } from "antd";
-import React, { useEffect, useState, useRef } from "react";
+import { Modal, Spin, notification } from "antd";
+import type { NotificationPlacement } from "antd/es/notification/interface";
+
+const Context = React.createContext({ name: "Default" });
 
 type parVal = {
   host: string;
@@ -40,6 +43,10 @@ function Dashboard({ host, user, bal, update }: parVal) {
   const [total, setTotal] = useState<number>(0);
   const [invest, setInvest] = useState<number>(0);
   const [recharge, setRecharge] = useState<rechPar[]>([]);
+  const [checkout, setCheckout] = useState<boolean>(false);
+  const [url, setUrl] = useState<string>("");
+
+  const [api, contextHolder] = notification.useNotification();
 
   const withDm = useRef(null);
   const rechAm = useRef(null);
@@ -107,9 +114,10 @@ function Dashboard({ host, user, bal, update }: parVal) {
   };
 
   const onRecharge = () => {
+    setLoadRech(true);
     let redLight = false;
     if (recharge.some((item) => !item.status)) {
-      alert(
+      notify(
         "Please cancel all pending and failed recharge bofore requesting for anothor"
       );
       redLight = true;
@@ -139,57 +147,36 @@ function Dashboard({ host, user, bal, update }: parVal) {
 
           setRefresh(!refresh);
         });
-    } else alert("invalid recharge amount");
+    } else notify("invalid recharge amount");
+  };
+
+  const onClose = () => {
+    setCheckout(false);
+    fetch(`${host}recharge`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        order_track_id: recharge[0].order_track_id,
+      }),
+    })
+      .then((resp) => resp.json())
+      .then((resp) => {
+        console.log(resp);
+        if (resp.payment_status_code)
+          notify(
+            `recharge of ${resp.amount} ${resp.payment_status_description} ${resp.payment_status_code}`
+          );
+        else if (resp.payment_status_description)
+          notify(
+            `recharge of ${resp.amount}, description: ${resp.payment_status_description}`
+          );
+        else notify(resp.msg);
+      });
   };
 
   const checkOut = (url: string) => {
-    const newWindowHeigth = window.innerHeight;
-    const newWindowWidth = window.innerWidth * 0.8;
-    const newWindow = window.open(
-      "",
-      "payment Varification",
-      `width=${newWindowWidth}, height=${newWindowHeigth}`
-    );
-
-    newWindow?.document.write(`
-                <html>
-                  <body>
-                    <div>
-                      <iframe
-                        title="Checkout Iframe"
-                        src=${url}
-                        width="100%"
-                        height="400"
-                        allowFullScreen
-                      ></iframe>
-                    </div>
-                  </body>
-                </html>
-              `);
-
-    if (newWindow)
-      newWindow.onbeforeunload = () => {
-        fetch(`${host}recharge`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            order_track_id: recharge[0].order_track_id,
-          }),
-        })
-          .then((resp) => resp.json())
-          .then((resp) => {
-            console.log(resp);
-            if (resp.payment_status_code)
-              alert(
-                `recharge of ${resp.amount} ${resp.payment_status_description} ${resp.payment_status_code}`
-              );
-            else if (resp.payment_status_description)
-              alert(
-                `recharge of ${resp.amount}, description: ${resp.payment_status_description}`
-              );
-            else alert(resp.msg);
-          });
-      };
+    setUrl(url);
+    setCheckout(true);
   };
 
   const cancelRecharge = (order_track_id: string) => {
@@ -212,8 +199,27 @@ function Dashboard({ host, user, bal, update }: parVal) {
       : element?.classList.remove("bg-green-500");
   };
 
+  const contextValue = useMemo(
+    () => ({
+      name: "Ckefa",
+    }),
+    []
+  );
+
+  const notify = (
+    message: string,
+    placement: NotificationPlacement = "topRight"
+  ) => {
+    api.info({
+      message: "Trasnasction Status",
+      description: message,
+      placement,
+    });
+  };
+
   return (
-    <div>
+    <Context.Provider value={contextValue}>
+      {contextHolder}
       <div className="font-bold">My Dashboard</div>
 
       <div className="flex gap-4">
@@ -249,11 +255,11 @@ function Dashboard({ host, user, bal, update }: parVal) {
           <div className="flex gap-4">
             <div className="bg-gold bg-silver bg-diamond bg-bronze hidden" />
             {packs?.map((item) => (
-              <Card
-                className={`w-[200px] bg-${item.name} flex flex-col items-center`}
-              >
+              <Card>
                 <div>pack: {item.name}</div>
                 <div>price: {item.price} ksh</div>
+                className=
+                {`w-[200px] bg-${item.name} flex flex-col items-center`}
                 <div>revenue: {item.revenue} ksh</div>
                 <Button
                   className="w-full"
@@ -270,6 +276,15 @@ function Dashboard({ host, user, bal, update }: parVal) {
 
       <div className="mt-8">
         <div className="font-bold">Transactions</div>
+
+        <Modal
+          title="complete checkout"
+          visible={checkout}
+          onOk={onClose}
+          onCancel={onClose}
+        >
+          <iframe src={url} width="100%" height="500" />
+        </Modal>
 
         <Card className="flex p-4 gap-4">
           <div className="flex flex-col gap-4">
@@ -319,7 +334,7 @@ function Dashboard({ host, user, bal, update }: parVal) {
                 <div>action</div>
               </div>
               {loadRech ? (
-                <Spin />
+                <Spin className="ml-28" />
               ) : (
                 <div>
                   {recharge.map((item) => (
@@ -370,7 +385,7 @@ function Dashboard({ host, user, bal, update }: parVal) {
           </Card>
         </div>
       </div>
-    </div>
+    </Context.Provider>
   );
 }
 

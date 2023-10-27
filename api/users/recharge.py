@@ -22,6 +22,7 @@ def cancle_order(order_track_id):
 def recharge():
     if request.method == "GET":
         phone = session.get("phone")
+        phone = "0710"
         user = User.query.filter_by(phone=phone).first()
         if user:
             orders = user.get_orders()
@@ -49,6 +50,7 @@ def recharge():
         data = request.json
         amount = data.get("amount")
         phone = session.get("phone")
+        phone = "0710"
         user = User.query.filter_by(phone=phone).first()
         if user:
             pending = user.get_invoices()
