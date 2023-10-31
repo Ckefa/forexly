@@ -12,7 +12,7 @@ function Register({ host }: parVal) {
 
   const onFinish = (data: unknown) => {
     console.log(data);
-    fetch(`${host}register`, {
+    fetch(`${host}/api/register.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),

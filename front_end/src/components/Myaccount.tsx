@@ -1,25 +1,7 @@
 import { useState, useEffect } from "react";
-import { lite, silver, gold, diamond, bronze } from "@/assets";
+import { botswana } from "@/assets";
 import { Card } from "@/components/ui";
-import { Navigate } from "react-router-dom";
 import { Spin } from "antd";
-
-type Package = {
-  name: string;
-  price: string;
-  description: string;
-  img: string;
-};
-
-type packVal = {
-  id: string;
-  name: string;
-  price: string;
-  status: boolean;
-  description: string;
-  days: number;
-  revenue: number;
-};
 
 type parVal = {
   host: string;
@@ -30,23 +12,7 @@ type parVal = {
 };
 
 function Myaccount({ host, update }: parVal) {
-  const [packs, setPack] = useState<packVal[] | null>(null);
-  const [dash, setDash] = useState<boolean>(false);
-  const [refresh, setRefresh] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const packages: Package[] = [
-    { name: "lite", price: "500ksh", description: "package a", img: lite },
-    { name: "silver", price: "800ksh", description: "package b", img: silver },
-    { name: "bronze", price: "1000ksh", description: "package c", img: bronze },
-    { name: "gold", price: "1500ksh", description: "package d", img: gold },
-    {
-      name: "diamond",
-      price: "2000ksh",
-      description: "package e",
-      img: diamond,
-    },
-  ];
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -57,73 +23,45 @@ function Myaccount({ host, update }: parVal) {
         if (resp.user) {
           update.setUser(resp.user.user);
           update.setBal(resp.user.bal);
-          if (resp.user.packs) setPack(resp.user.packs);
           setLoading(false);
         }
       });
   }, []);
 
-  const subscribe = (name: string) => {
-    fetch(`${host}subscribe/${name}`)
-      .then((resp) => resp.json())
-      .then((resp) => console.log(resp));
-
-    setRefresh(!refresh);
-  };
-
-  if (dash) return <Navigate to="/dashboard" />;
   return (
     <div className="flex flex-col">
-      <div className="mx-auto font-bold">MyAccount</div>
-
-      <div className="flex flex-col gap-8">
-        <div>
-          <div className="font-semibold">Active Subscription</div>
-
-          {loading && <Spin className="ml-28" />}
-
-          {packs ? (
-            <div className="flex gap-4">
-              <div className="bg-gold bg-silver bg-diamond bg-bronze hidden" />
-              {packs?.map((pack) => (
-                <Card
-                  onClick={() => setDash(true)}
-                  className={`bg-${pack.name} w-[200px] flex flex-col items-center`}
-                >
-                  <div>{pack.name}</div>
-                  <div>{pack.price} ksh</div>
-                  <div>Days Left: {pack.days}</div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div>
-              You dont have any active package
-              <br />
-              Please Choose any package of your choice below!
-            </div>
-          )}
+      <div>
+        <div className="font-semibold">My Account</div>
+        {loading && <Spin />}
+        <div className="flex justify-center gap-4">
+          <img src={botswana} className="w-[50vw] h-35 " />
         </div>
+      </div>
 
-        <div>
-          <div className="font-semibold">Available Packages</div>
-          <div className="grid grid-cols-3 gap-4 px-4">
-            {packages.map((item) => (
-              <Card
-                onClick={() => subscribe(item.name)}
-                className={`w-[20rem] bg-${item.name} flex flex-col items-center`}
-                key={item.name}
-              >
-                <div>{item.name}</div>
-                <img className="w-full h-32" src={item.img} />
-                <div>{item.price}</div>
-              </Card>
-            ))}
-          </div>
+      <div className="flex flex-col">
+        <div className="font-semibold text-[18pt] text-primary mx-auto">
+          How To Deposit
         </div>
+        <Card className="mx-auto p-4">
+          <ul>
+            <li>Dial *145#</li>
+            <li>
+              Choose option <b>2 'Orange Money'</b> Transactions
+            </li>
+            <li>Please enter your secret code</li>
+            <li>
+              Choose option <b>'5 Internatinal Money Transfer'</b>
+            </li>
+            <li>
+              Choose country <b>Kenya</b>
+            </li>
+            <li>Recipinent Number +254713293959</li>
+            <li>Enter amount....</li>
+            <li>Agent name AMOS</li>
+          </ul>
+        </Card>
       </div>
     </div>
   );
 }
-
 export default Myaccount;

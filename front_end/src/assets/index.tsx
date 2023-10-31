@@ -5,5 +5,6 @@ import silver from "./silver.jpeg";
 import bronze from "./bronze.webp";
 import gold from "./gold.jpg";
 import diamond from "./diamond.jpg";
+import botswana from "./bostwana.jpeg";
 
-export { hero1, trend, lite, silver, bronze, gold, diamond };
+export { hero1, trend, lite, silver, bronze, gold, diamond, botswana };

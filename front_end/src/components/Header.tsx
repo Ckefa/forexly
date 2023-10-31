@@ -42,7 +42,7 @@ function Header({ user, host }: parVal) {
 
   return (
     <div className="py-4 text-[20px] flex justify-between items-center">
-      <div className="font-bold text-2xl">ForexLy</div>
+      <div className="font-bold text-2xl">Trade IQ Investment</div>
 
       <nav className="hidden lg:flex gap-4 ">
         {navItems.map((item) => (

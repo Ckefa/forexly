@@ -44,16 +44,20 @@ function Home() {
               Unleash Your Financial Potential with Us
             </h2>
             <p className="text-lg mb-6">
-              At ForexLy, we don't just trade Forex; we're passionate about
-              helping you unlock your financial potential. Join our community of
-              seasoned experts and traders, and embark on a journey towards
-              financial growth like never before.
+              We deliver our Commitment to our investors and actualise our plans
+              of transforming their financial status by achieving their Crypto
+              profit on the agreed time.We analyze the market, keep a close eye
+              on the world economy, and provide detailed Signals with Precise
+              Entry Prices, Stop Loss and Take Profit. Have your interested
+              investment plan that you would wish to get started with.
             </p>
             <p className="text-lg">
-              What sets us apart is our commitment to your success. Our team of
-              experts has years of experience navigating the intricate world of
-              Forex trading. We provide you with the knowledge, tools, and
-              support needed to make informed trading decisions.
+              Deposit your investment amount using your preferred payment wallet
+              before our trading session shift begins.After 5hrs of the agreed
+              time through our spectacular strategies and experience, we shall
+              be having back your Crypto profit through your Preferred payment
+              wallet you used while depositing your investment Deposit amount
+              after 10% will be deducted as our commission. Thank you.
             </p>
           </div>
         </div>

@@ -10,7 +10,7 @@ function Login({ host }: parVal) {
   const [home, setHome] = useState(false);
 
   const onFinish = (data: unknown) => {
-    fetch(`${host}login`, {
+    fetch(`${host}api/login.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
