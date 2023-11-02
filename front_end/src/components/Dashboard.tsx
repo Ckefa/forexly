@@ -67,9 +67,9 @@ function Dashboard({ host, user, bal, update }: parVal) {
           setPacks(resp.user.packs);
           setPhone(resp.user.phone);
           updateUser(resp.user.packs);
-          setLoading(false);
         }
       });
+    setLoading(false);
   };
   const fetchRecharge = () => {
     setLoadRech(true);
@@ -79,9 +79,8 @@ function Dashboard({ host, user, bal, update }: parVal) {
         console.log(resp);
         if (resp.pending) setRecharge(resp.pending);
         else setRecharge([]);
-
-        setLoadRech(false);
       });
+    setLoadRech(false);
   };
 
   useEffect(() => {
@@ -255,11 +254,12 @@ function Dashboard({ host, user, bal, update }: parVal) {
           <div className="flex gap-4">
             <div className="bg-gold bg-silver bg-diamond bg-bronze hidden" />
             {packs?.map((item) => (
-              <Card>
+              <Card
+                className={`w-[200px] bg-${item.name} flex flex-col items-center`}
+              >
                 <div>pack: {item.name}</div>
                 <div>price: {item.price} ksh</div>
-                className=
-                {`w-[200px] bg-${item.name} flex flex-col items-center`}
+
                 <div>revenue: {item.revenue} ksh</div>
                 <Button
                   className="w-full"
